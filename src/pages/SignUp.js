@@ -22,6 +22,8 @@ import Title from "antd/es/typography/Title";
 
 import moment from "moment";
 import React, { useEffect, useState } from "react";
+import { useRef } from "react";
+import { createGlobalStyle } from "styled-components";
 import {
   blogAPI,
   DeleteblogAPI,
@@ -141,6 +143,8 @@ const Blog = () => {
   const [form] = Form.useForm();
   const [data, setData] = useState([]);
 
+  const refImg = useRef(null);
+
   const getBlog = async () => {
     try {
       const res = await getblogApi();
@@ -165,11 +169,30 @@ const Blog = () => {
   const [edit, setEdit] = useState(false);
   const [a, seta] = useState([]);
 
+  const closeModal = () => {
+    setEdit(false);
+  };
+
   const Editdata = async (record) => {
-    console.log("aa");
     setEdit(true);
     seta(record);
   };
+
+  useEffect(() => {
+    const img = document.createElement("img");
+    img.classList.add("imgEditRef");
+    img.src = a.image?.url;
+
+    if (refImg.current) {
+      console.log(refImg.current.childNodes.length);
+      if (refImg.current.childNodes.length > 0) {
+        const imgChild = document.getElementsByClassName("imgEditRef");
+        // refImg.current.removeChild(imgChild);
+      }
+      refImg.current.appendChild(img);
+    }
+  }, [a]);
+
   return (
     <div>
       <Row gutter={[24, 12]}>
@@ -226,10 +249,10 @@ const Blog = () => {
           </Card>
         </Col>
         <Modal
-          title="Chỉnh sửa tin tức "
+          title="Chỉnh sửa tin tức"
           open={edit}
           okText="Chỉnh sửa"
-          onCancel={() => setEdit(false)}
+          onCancel={closeModal}
           onOk={async () => {
             try {
               const res = await editblogAPI(
@@ -270,9 +293,16 @@ const Blog = () => {
                 }
               />
             </Col>
-            {/* <Col xs={24} md={24}>
-              <img />
-            </Col> */}
+            <Col xs={24} md={24}>
+              <label htmlFor="imgEditProduct" ref={refImg}></label>
+              <input
+                type="file"
+                name="file"
+                hidden
+                id="imgEditProduct"
+                onChange={handleFileInputChange}
+              />
+            </Col>
           </Row>
         </Modal>
       </Row>
