@@ -8,7 +8,7 @@ import Main from "./components/layout/Main";
 import "./assets/styles/main.css";
 import "./assets/styles/responsive.css";
 import Billing from "./pages/Billing";
-// import News from "./pages/News";
+
 import Dashboard from "./pages/Dashboard";
 
 function App() {
@@ -23,7 +23,7 @@ function App() {
           <Route exact path="/billing" component={Billing} />
           <Route exact path="/profile" component={Profile} />
           <Route path="/sign-up" exact component={SignUp} />
-          <Redirect from="*" to="/dashboard" />
+          <Redirect from="*" to="/signin" />
         </Main>
       </Switch>
     </div>

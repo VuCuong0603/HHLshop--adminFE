@@ -1,55 +1,101 @@
-import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
-import { Button, Card, Col, Row, Space, Table } from "antd";
+import { Button, Card, Col, Row, Space, Table, Modal } from "antd";
 import React, { useEffect, useState } from "react";
-import { orderAPI } from "../Api/order/Order";
+import { addorderAPI, Editorder, orderAPI } from "../Api/order/Order";
 import { Excel } from "antd-table-saveas-excel";
 import Title from "antd/es/typography/Title";
+import { Select } from "antd";
+import moment from "moment";
 const Home = () => {
   const [order, setOrder] = useState([]);
-  const dataSource = [
-    {
-      key: "1",
-      usernameId: "#1265622353",
-      byDate: "31/12/2023",
-      phoneNumber: "0976031652",
-      address: "Cầu giấy , hà nội",
-      status: "đã giao hàng",
-      total: "1900000",
-    },
-    {
-      key: "2",
-      usernameId: "#12656223234",
-      byDate: "31/12/2023",
-      phoneNumber: "0976031651",
-      address: "Cầu giấy , hà nội",
-      status: "đã giao hàng",
-      total: "1800000",
-    },
-    {
-      key: "3",
-      usernameId: "#1265622329",
-      byDate: "31/12/2023",
-      phoneNumber: "0976031653",
-      address: "Cầu giấy , hà nội",
-      status: "đã hủy bỏ",
-      total: "1400000",
-    },
-    {
-      key: "4",
-      usernameId: "#1265622373",
-      byDate: "31/12/2023",
-      phoneNumber: "0976031658",
-      address: "Cầu giấy , hà nội",
-      status: "Chưa được giao hàng",
-      total: "1600000",
-    },
-  ];
-
   const columns = [
     {
-      title: "usernameId",
-      dataIndex: "usernameId",
-      key: "username",
+      title: "Họ tên khách hàng",
+      dataIndex: "customerName",
+      key: "customerName",
+    },
+
+    {
+      title: "Ngày tạo tài khoản",
+      dataIndex: "byDate",
+      key: "byDate",
+      render: (byDate) => <div>{moment(byDate).format("MMMM Do YYYY")}</div>,
+    },
+    {
+      title: "Số điện thoại",
+      dataIndex: "phoneNumber",
+      key: "phoneNumber",
+    },
+    {
+      title: "Địa chỉ ",
+      dataIndex: "address",
+      key: "address",
+      ellipsis: true,
+    },
+    {
+      title: "Trạng thái đơn hàng",
+      key: "status",
+      dataIndex: "status",
+    },
+    {
+      title: "Tổng tiền",
+      dataIndex: "total",
+      key: "total",
+    },
+    {
+      title: "Chi tiết đơn hàng",
+      key: "action",
+      render: (_, record) => (
+        <>
+          <Space size="middle" onClick={() => OrderId(record)}>
+            <p>Xem Chi tiết</p>
+          </Space>
+        </>
+      ),
+    },
+
+    {
+      title: "Chốt đơn hàng",
+      key: "status",
+      render: (_, record) => (
+        <>
+          <Select
+            defaultValue="placed"
+            style={{ width: 120 }}
+            onChange={handleChangeSelect}
+            options={[
+              { value: "placed", label: "placed" },
+              { value: "delivered", label: "delivered" },
+              { value: "canceled", label: "canceled" },
+            ]}
+          ></Select>
+        </>
+      ),
+    },
+  ];
+  const handleChangeSelect = async (values) => {
+    console.log("value", values);
+    // try {
+    //   const res = await Editorder(record._id, value);
+    //   getOrder();
+    // } catch {
+    //   console.log("error");
+    // }
+  };
+  const [dataOrder, setdataOrder] = useState([]);
+  const OrderId = async (record) => {
+    setEdit(true);
+    try {
+      const res = await addorderAPI(record._id);
+      setdataOrder(res.order);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const column = [
+    {
+      title: "Họ tên khách hàng",
+      dataIndex: "customerName",
+      key: "customerName",
     },
     {
       title: "Ngày mua",
@@ -76,23 +122,14 @@ const Home = () => {
       dataIndex: "total",
       key: "total",
     },
-    {
-      title: "Chi tiết đơn hàng",
-      key: "action",
-      render: (_, record) => (
-        <>
-          <Space size="middle">
-            <p>Xem Chi tiết</p>
-          </Space>
-        </>
-      ),
-    },
   ];
+  const [edit, setEdit] = useState(false);
 
   const getOrder = async () => {
     try {
       const res = await orderAPI();
-      console.log("res");
+      const a = res.result.orders;
+      setOrder(a);
     } catch (error) {
       console.log(error);
     }
@@ -115,17 +152,53 @@ const Home = () => {
               const excel = new Excel();
               excel
                 .addSheet("test")
-                .addColumns(columns)
-                .addDataSource(dataSource)
+                .addColumns(column)
+                .addDataSource(order)
                 .saveAs("Đơn_đặt_hàng.xlsx");
             }}
           >
             Xuất Excel
           </Button>
           <Card>
-            <Table dataSource={dataSource} columns={columns} />;
+            <Table columns={columns} dataSource={order} />;
           </Card>
         </Col>
+        <Modal
+          title="Chi tiết đơn hàng"
+          open={edit}
+          onCancel={() => setEdit(false)}
+          onOk={() => setEdit(false)}
+        >
+          <Row>
+            <Col span={24}>Tên người đặt hàng :{dataOrder?.customerName}</Col>
+            <Col span={24}>địa chỉ người nhận :{dataOrder?.address}</Col>
+            <Col span={24}>Mã code sản phẩm :{dataOrder?.code}</Col>
+            <Col span={24}>
+              Tên tài khoản người dùng:{dataOrder?.customerId?.username}
+            </Col>
+            <Col span={24}>
+              Số điện thoại mua hàng :{dataOrder?.phoneNumber}
+            </Col>
+            <Col span={24}>email đăng kí :{dataOrder?.customerId?.email}</Col>
+            <Col span={24}>
+              số điện thoại đăng kí tài khoản :
+              {dataOrder?.customerId?.phoneNumber}
+            </Col>
+            <Col span={24}>
+              danh sách các loại sản phẩm mua hàng:
+              {dataOrder?.details?.map((i) => (
+                <Col span={24}>-{i?.product?.name}</Col>
+              ))}
+            </Col>
+
+            <Col span={24}>
+              Tổng số tiền:
+              <a style={{ color: "red" }}>
+                {dataOrder?.total?.toLocaleString()}đ
+              </a>
+            </Col>
+          </Row>
+        </Modal>
       </Row>
     </div>
   );
