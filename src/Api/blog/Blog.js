@@ -11,3 +11,8 @@ export const getblogApi = () => {
 export const DeleteblogAPI = (id) => {
   return client.delete(`/blogs/${id}`).then((res) => res.data);
 };
+export const editblogAPI = ({ title, detail, image }) => {
+  return client
+    .delete("/blogs", { title, detail, image })
+    .then((res) => res.data);
+};

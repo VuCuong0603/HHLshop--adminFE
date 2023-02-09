@@ -55,12 +55,7 @@ const SignIn = () => {
                 Nhập tài khoản , mật khẩu để theo dõi tiến độ bán hàng và mua
                 hàng của cửa hàng HHL
               </Title>
-              <Form
-                onFinish={onFinish}
-                // onFinishFailed={onFinishFailed}
-                layout="vertical"
-                className="row-col"
-              >
+              <Form onFinish={onFinish} layout="vertical" className="row-col">
                 <Form.Item
                   className="username"
                   label="Email"

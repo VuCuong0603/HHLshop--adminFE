@@ -15,12 +15,19 @@ import {
   Space,
   Table,
   Upload,
+  Modal,
 } from "antd";
 import TextArea from "antd/es/input/TextArea";
 import Title from "antd/es/typography/Title";
+
 import moment from "moment";
 import React, { useEffect, useState } from "react";
-import { blogAPI, DeleteblogAPI, getblogApi } from "../Api/blog/Blog";
+import {
+  blogAPI,
+  DeleteblogAPI,
+  editblogAPI,
+  getblogApi,
+} from "../Api/blog/Blog";
 
 const Blog = () => {
   const columns = [
@@ -58,7 +65,7 @@ const Blog = () => {
       dataIndex: "createdAt",
       key: "cre<atedAt",
       render: (createdAt) => (
-        <div>{moment(createdAt).format("MMMM Do YYYY, h:mm:ss a")}</div>
+        <div>{moment(createdAt).format("MMMM Do YYYY")}</div>
       ),
     },
     {
@@ -122,9 +129,6 @@ const Blog = () => {
       file: e.target.files[0],
     });
   };
-  const Editdata = () => {
-    console.log("aaaa");
-  };
   const DeleteUser = async (record) => {
     try {
       const data = await DeleteblogAPI(record._id);
@@ -158,7 +162,14 @@ const Blog = () => {
   useEffect(() => {
     getBlog();
   }, []);
+  const [edit, setEdit] = useState(false);
+  const [a, seta] = useState([]);
 
+  const Editdata = async (record) => {
+    console.log("aa");
+    setEdit(true);
+    seta(record);
+  };
   return (
     <div>
       <Row gutter={[24, 12]}>
@@ -214,6 +225,56 @@ const Blog = () => {
             <Table columns={columns} dataSource={data} />
           </Card>
         </Col>
+        <Modal
+          title="Chỉnh sửa tin tức "
+          open={edit}
+          okText="Chỉnh sửa"
+          onCancel={() => setEdit(false)}
+          onOk={async () => {
+            try {
+              const res = await editblogAPI(
+                a?._id,
+                a?.title,
+                a?.detail
+                //  còn ảnh
+              );
+              message.success("Cập nhập thành công");
+              getBlog();
+              setEdit(false);
+            } catch (error) {
+              message.warning("Cập nhập thất bại");
+              setEdit(false);
+            }
+          }}
+        >
+          <Row gutter={[0, 8]}>
+            <Col xs={24} md={24}>
+              <Input
+                placeholder="Tiêu đề bài viết"
+                value={a?.title}
+                onChange={(e) =>
+                  seta((c) => {
+                    return { ...c, title: e.target.value };
+                  })
+                }
+              />
+            </Col>
+            <Col xs={24} md={24}>
+              <TextArea
+                placeholder="Nội dung bài viết"
+                value={a?.detail}
+                onChange={(e) =>
+                  seta((c) => {
+                    return { ...c, detail: e.target.value };
+                  })
+                }
+              />
+            </Col>
+            {/* <Col xs={24} md={24}>
+              <img />
+            </Col> */}
+          </Row>
+        </Modal>
       </Row>
     </div>
   );
