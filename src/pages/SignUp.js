@@ -47,21 +47,20 @@ const Blog = () => {
       width: 300,
       ellipsis: true,
     },
-    {
-      title: "Ngày tạo tài khoản",
-      dataIndex: "createdAt",
-      key: "createdAt",
-      render: (_, e) => (
-        <Image
-          src={e.image?.url}
-          key={e.image?._id}
-          width={90}
-          height={100}
-          style={{ borderRadius: "5px", padding: "5px" }}
-        />
-      ),
-    },
-
+    // {
+    //   title: "Ngày tạo tài khoản",
+    //   dataIndex: "createdAt",
+    //   key: "createdAt",
+    //   render: (_, e) => (
+    //     <Image
+    //       src={e.image?.url}
+    //       key={e.image?._id}
+    //       width={90}
+    //       height={100}
+    //       style={{ borderRadius: "5px", padding: "5px" }}
+    //     />
+    //   ),
+    // },
     {
       title: "Ngày tạo bài viết",
       dataIndex: "createdAt",
@@ -74,18 +73,19 @@ const Blog = () => {
       title: "Action",
       key: "action",
       render: (_, record) => (
-        <>
-          <Space size="middle">
-            <EditOutlined onClick={() => Editdata(record)} />
-            <DeleteOutlined
-              style={{ color: "red" }}
-              onClick={() => DeleteUser(record)}
-            />
-          </Space>
-        </>
+        <Space size="middle">
+          <EditOutlined onClick={() => Editdata(record)} />
+          <DeleteOutlined
+            style={{ color: "red" }}
+            onClick={() => DeleteUser(record)}
+          />
+        </Space>
       ),
     },
   ];
+
+  const [tempImg, setTempImg] = useState("");
+
   const [img, setImg] = useState({ file: null, base64URL: "" });
   const getBase64 = (file) => {
     return new Promise((resolve) => {
@@ -100,19 +100,21 @@ const Blog = () => {
       // on reader load somthing...
       reader.onload = () => {
         // Make a fileInfo Object
-        console.log("Called", reader);
         baseURL = reader.result;
-        console.log(baseURL);
         resolve(baseURL);
       };
-      console.log(fileInfo);
     });
   };
   const handleFileInputChange = (e) => {
-    console.log("a", e.target.files[0]);
     let { file } = img;
-
     file = e.target.files[0];
+
+    let reader = new FileReader();
+    let url = reader.readAsDataURL(file);
+
+    reader.onloadend = function (e) {
+      setTempImg([reader.result]);
+    }.bind(this);
 
     getBase64(file)
       .then((result) => {
@@ -178,20 +180,20 @@ const Blog = () => {
     seta(record);
   };
 
-  useEffect(() => {
-    const img = document.createElement("img");
-    img.classList.add("imgEditRef");
-    img.src = a.image?.url;
+  // useEffect(() => {
+  //   const img = document.createElement("img");
+  //   img.classList.add("imgEditRef");
+  //   img.src = a.image?.url;
 
-    if (refImg.current) {
-      console.log(refImg.current.childNodes.length);
-      if (refImg.current.childNodes.length > 0) {
-        const imgChild = document.getElementsByClassName("imgEditRef");
-        // refImg.current.removeChild(imgChild);
-      }
-      refImg.current.appendChild(img);
-    }
-  }, [a]);
+  //   if (refImg.current) {
+  //     console.log(refImg.current.childNodes.length);
+  //     if (refImg.current.childNodes.length > 0) {
+  //       const imgChild = document.getElementsByClassName("imgEditRef");
+  //       // refImg.current.removeChild(imgChild);
+  //     }
+  //     refImg.current.appendChild(img);
+  //   }
+  // }, [a]);
 
   return (
     <div>
@@ -294,7 +296,13 @@ const Blog = () => {
               />
             </Col>
             <Col xs={24} md={24}>
-              <label htmlFor="imgEditProduct" ref={refImg}></label>
+              <label htmlFor="imgEditProduct" ref={refImg}>
+                <img
+                  className="object-contain max-h-[128px]"
+                  alt="logo-company"
+                  src={tempImg || a.image?.url}
+                />
+              </label>
               <input
                 type="file"
                 name="file"
