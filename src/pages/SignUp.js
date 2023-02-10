@@ -113,6 +113,7 @@ const Blog = () => {
     let url = reader.readAsDataURL(file);
 
     reader.onloadend = function (e) {
+      console.log("reader.result..", reader.result);
       setTempImg([reader.result]);
     }.bind(this);
 
